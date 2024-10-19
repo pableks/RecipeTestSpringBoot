@@ -1,24 +1,29 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title th:text="${name}">Home</title>
+    <title>Home - Recipe Sharing App</title>
     <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
     <div class="container">
-        <h1 th:text="'Bienvenido a ' + ${name} + '!'"></h1>
-
-        <div sec:authorize="isAuthenticated()" class="user-greeting">
-            <h2 th:inline="text">Hola, [[${username}]]!</h2>
+        <h1 th:text="'Welcome to ' + ${name} + '!'"></h1>
+        
+        <div sec:authorize="isAuthenticated()">
+            <h2 th:text="'Hello, ' + ${username} + '!'"></h2>
             <p>Seguridad implementada con Spring Security</p>
-            <form th:action="@{/logout}" method="post">
-                <input type="submit" value="Logout" class="btn btn-logout"/>
-            </form>
+            <div class="nav-links">
+                <a th:href="@{/dashboard}">Dashboard</a>
+                <a th:href="@{/users/profile}">My Profile</a>
+                <a th:href="@{/logout}">Logout</a>
+            </div>
         </div>
-
+        
         <div sec:authorize="!isAuthenticated()">
-            <p>Por favor, inicia sesión para acceder a todas las funcionalidades.</p>
-            <a th:href="@{/login}" class="btn btn-primary">Ir a Login</a>
+            <p>Please log in to access all features.</p>
+            <div class="nav-links">
+                <a th:href="@{/login}" class="btn btn-primary">Login</a>
+                <a th:href="@{/users/register}" class="btn btn-secondary">Register</a>
+            </div>
         </div>
     </div>
 </body>
