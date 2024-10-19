@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Dashboard - Recipe Sharing App</title>
+    <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Your Dashboard</h1>
+        
+        <div sec:authorize="isAuthenticated()">
+            <h2 th:text="'Hello, ' + ${username} + '!'"></h2>
+            <p>Here's your personal dashboard for the Recipe Sharing App.</p>
+            
+            <div class="user-info">
+                <h3>Your Information:</h3>
+                <p th:text="'Username: ' + ${username}"></p>
+                <p th:text="'Email: ' + ${userEmail}"></p>
+                <p th:text="'Role: ' + ${userRole}"></p>
+            </div>
+            
+            <div class="dashboard-links">
+                <h3>Quick Links:</h3>
+                <ul>
+                    <li><a th:href="@{/recipes}">View All Recipes</a></li>
+                    <li><a th:href="@{/recipes/my-recipes}">My Recipes</a></li>
+                    <li><a th:href="@{/recipes/new}">Create New Recipe</a></li>
+                    <li><a th:href="@{/users/profile}">Edit Profile</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="logout-link">
+            <form th:action="@{/logout}" method="post">
+                <input type="submit" value="Logout" />
+            </form>
+        </div>
+    </div>
+</body>
+</html>

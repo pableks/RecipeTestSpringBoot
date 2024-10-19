@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>All Recipes - Recipe Sharing App</title>
+    <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+    <div class="container">
+        <h1>All Recipes</h1>
+        <div th:if="${recipes == null}">
+            <p>Recipes list is null. There might be an error in the controller or service.</p>
+        </div>
+        <div th:if="${recipes != null and recipes.empty}">
+            <p>No recipes found. Be the first to add a recipe!</p>
+        </div>
+        <div th:if="${recipes != null and not recipes.empty}">
+            <p th:text="'Total recipes: ' + ${recipes.size()}"></p>
+            <ul>
+                <li th:each="recipe : ${recipes}">
+                    <a th:href="@{/recipes/{id}(id=${recipe.id})}" th:text="${recipe.name}"></a>
+                    <span th:text="' by ' + ${recipe.createdBy}"></span>
+                    <span th:text="' (Preparation time: ' + ${recipe.preparationTime} + ' minutes)'"></span>
+                    <span th:text="' - Difficulty: ' + ${recipe.difficulty}"></span>
+                </li>
+            </ul>
+        </div>
+        <a th:href="@{/recipes/new}">Create New Recipe</a>
+        <a th:href="@{/dashboard}">Back to Dashboard</a>
+    </div>
+</body>
+</html>

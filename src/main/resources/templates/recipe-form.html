@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Create New Recipe - Recipe Sharing App</title>
+    <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+    <div class="container">
+        <h1>Create New Recipe</h1>
+        <form th:action="@{/recipes}" method="post" th:object="${recipe}">
+            <div class="form-group">
+                <label for="name">Recipe Name:</label>
+                <input type="text" id="name" th:field="*{name}" required />
+            </div>
+            <div class="form-group">
+                <label for="preparationTime">Preparation Time (minutes):</label>
+                <input type="number" id="preparationTime" th:field="*{preparationTime}" required />
+            </div>
+            <div class="form-group">
+                <label for="difficulty">Difficulty:</label>
+                <select id="difficulty" th:field="*{difficulty}">
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="ingredients">Ingredients (one per line):</label>
+                <textarea id="ingredients" th:field="*{ingredients}" rows="5" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="preparation">Preparation Steps:</label>
+                <textarea id="preparation" th:field="*{preparation}" rows="10" required></textarea>
+            </div>
+            <div class="form-group">
+                <button type="submit">Create Recipe</button>
+            </div>
+        </form>
+        <div class="back-link">
+            <a th:href="@{/recipes}">Back to Recipes</a>
+        </div>
+    </div>
+</body>
+</html>

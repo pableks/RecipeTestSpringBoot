@@ -11,6 +11,7 @@ import com.duoc.seguridad_calidad.model.Recipe;
 import com.duoc.seguridad_calidad.service.RecipeService;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 @Controller
@@ -58,6 +59,13 @@ public class RecipeController {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String username = auth.getName();
             recipe.setCreatedBy(username);
+            
+            // Convert ingredients string to List<String>
+            if (recipe.getIngredients() != null && !recipe.getIngredients().isEmpty()) {
+                List<String> ingredientList = Arrays.asList(recipe.getIngredients().split("\\r?\\n"));
+                recipe.setIngredientList(ingredientList);
+            }
+            
             recipeService.saveRecipe(recipe);
             return "redirect:/recipes";
         } catch (IOException e) {
