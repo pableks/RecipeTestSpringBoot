@@ -3,7 +3,6 @@ package com.duoc.seguridad_calidad.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Recipe {
     private String id;
@@ -13,23 +12,24 @@ public class Recipe {
     private String difficulty;
     private String ingredients; // This will hold the raw string from the form
     private List<String> ingredientList; // This will hold the parsed list of ingredients
-    private String preparation;
+    private String preparation; // Raw preparation steps string from the form
+    private List<String> preparationSteps; // Parsed list of preparation steps
 
     // Default constructor
     public Recipe() {}
 
-    // Constructor with List<String> for ingredients
-    public Recipe(String id, String name, String createdBy, int preparationTime, String difficulty, List<String> ingredientList, String preparation) {
+    // Constructor with List<String> for ingredients and preparation steps
+    public Recipe(String id, String name, String createdBy, int preparationTime, String difficulty, List<String> ingredientList, List<String> preparationSteps) {
         this.id = id;
         this.name = name;
         this.createdBy = createdBy;
         this.preparationTime = preparationTime;
         this.difficulty = difficulty;
         this.setIngredientList(ingredientList);
-        this.preparation = preparation;
+        this.setPreparationSteps(preparationSteps);
     }
 
-    // Constructor with String for ingredients
+    // Constructor with String for ingredients and preparation
     public Recipe(String id, String name, String createdBy, int preparationTime, String difficulty, String ingredients, String preparation) {
         this.id = id;
         this.name = name;
@@ -37,7 +37,7 @@ public class Recipe {
         this.preparationTime = preparationTime;
         this.difficulty = difficulty;
         this.setIngredients(ingredients);
-        this.preparation = preparation;
+        this.setPreparation(preparation);
     }
 
     // Getters and setters
@@ -105,5 +105,15 @@ public class Recipe {
 
     public void setPreparation(String preparation) {
         this.preparation = preparation;
+        this.preparationSteps = preparation != null ? Arrays.asList(preparation.split("\\r?\\n")) : new ArrayList<>();
+    }
+
+    public List<String> getPreparationSteps() {
+        return preparationSteps;
+    }
+
+    public void setPreparationSteps(List<String> preparationSteps) {
+        this.preparationSteps = preparationSteps;
+        this.preparation = preparationSteps != null ? String.join("\n", preparationSteps) : "";
     }
 }

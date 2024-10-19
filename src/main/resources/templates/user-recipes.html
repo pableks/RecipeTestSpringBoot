@@ -60,8 +60,11 @@
                         <ul>
                             <li th:each="ingredient : ${recipe.ingredientList}" th:text="${ingredient}"></li>
                         </ul>
-                        <h3>Preparation:</h3>
-                        <p th:text="${#strings.abbreviate(recipe.preparation, 200)}"></p>
+                        <h3>Preparation Steps:</h3>
+                        <ol>
+                            <li th:each="step : ${recipe.preparationSteps}" th:text="${step}"></li>
+                        </ol>
+
                     </div>
                 </li>
             </ul>

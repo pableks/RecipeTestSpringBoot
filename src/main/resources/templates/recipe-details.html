@@ -36,7 +36,10 @@
         </ul>
 
         <h2>Preparation Steps:</h2>
-        <div class="preparation-steps" th:text="${recipe.preparation}"></div>
+        <ol>
+            <li th:each="step : ${recipe.preparationSteps}" th:text="${step}"></li>
+        </ol>
+
 
         <div class="navigation-links">
             <a th:href="@{/recipes}">Back to All Recipes</a>
