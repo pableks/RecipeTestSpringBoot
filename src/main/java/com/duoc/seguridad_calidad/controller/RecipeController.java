@@ -79,6 +79,12 @@ public class RecipeController {
         try {
             Recipe recipe = recipeService.getRecipeById(id);
             model.addAttribute("recipe", recipe);
+            
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String currentUser = auth.getName();
+            boolean isOwner = currentUser.equals(recipe.getCreatedBy());
+            model.addAttribute("isOwner", isOwner);
+            
             return "recipe-details";
         } catch (IOException e) {
             model.addAttribute("error", "Error loading recipe: " + e.getMessage());
@@ -90,6 +96,14 @@ public class RecipeController {
     public String editRecipeForm(@PathVariable String id, Model model) {
         try {
             Recipe recipe = recipeService.getRecipeById(id);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String currentUser = auth.getName();
+            
+            if (!currentUser.equals(recipe.getCreatedBy())) {
+                model.addAttribute("error", "You are not authorized to edit this recipe.");
+                return "error";
+            }
+            
             model.addAttribute("recipe", recipe);
             return "recipe-form";
         } catch (IOException e) {
@@ -101,7 +115,17 @@ public class RecipeController {
     @PostMapping("/{id}")
     public String updateRecipe(@PathVariable String id, @ModelAttribute Recipe recipe, Model model) {
         try {
+            Recipe existingRecipe = recipeService.getRecipeById(id);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String currentUser = auth.getName();
+            
+            if (!currentUser.equals(existingRecipe.getCreatedBy())) {
+                model.addAttribute("error", "You are not authorized to update this recipe.");
+                return "error";
+            }
+            
             recipe.setId(id);
+            recipe.setCreatedBy(existingRecipe.getCreatedBy()); // Ensure the creator doesn't change
             recipeService.saveRecipe(recipe);
             return "redirect:/recipes/" + id;
         } catch (IOException e) {
@@ -113,6 +137,15 @@ public class RecipeController {
     @PostMapping("/{id}/delete")
     public String deleteRecipe(@PathVariable String id, Model model) {
         try {
+            Recipe recipe = recipeService.getRecipeById(id);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String currentUser = auth.getName();
+            
+            if (!currentUser.equals(recipe.getCreatedBy())) {
+                model.addAttribute("error", "You are not authorized to delete this recipe.");
+                return "error";
+            }
+            
             recipeService.deleteRecipe(id);
             return "redirect:/recipes";
         } catch (IOException e) {
