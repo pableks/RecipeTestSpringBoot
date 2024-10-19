@@ -96,7 +96,7 @@
             
             <div class="form-group">
                 <label>Ingredients:</label>
-                <input type="text" id="ingredientInput" placeholder="Enter an ingredient">
+                <input type="text" id="ingredientInput" placeholder="Enter an ingredient" onkeypress="handleKeyPress(event, 'ingredient')">
                 <button type="button" onclick="addIngredient()">Add Ingredient</button>
                 <ul id="ingredientList"></ul>
                 <input type="hidden" id="ingredientsInput" th:field="*{ingredients}">
@@ -104,7 +104,7 @@
             
             <div class="form-group">
                 <label>Preparation Steps:</label>
-                <input type="text" id="stepInput" placeholder="Enter a preparation step">
+                <input type="text" id="stepInput" placeholder="Enter a preparation step" onkeypress="handleKeyPress(event, 'step')">
                 <button type="button" onclick="addStep()">Add Step</button>
                 <ol id="stepList"></ol>
                 <input type="hidden" id="preparationInput" th:field="*{preparation}">
@@ -129,10 +129,21 @@
             steps = '';
         }
     
+        function handleKeyPress(event, type) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                if (type === 'ingredient') {
+                    addIngredient();
+                } else if (type === 'step') {
+                    addStep();
+                }
+            }
+        }
+
         function addIngredient() {
             const input = document.getElementById('ingredientInput');
             if (input.value.trim() !== '') {
-                ingredients += (ingredients ? '\n' : '') + input.value.trim(); // No bullet point here
+                ingredients += (ingredients ? '\n' : '') + input.value.trim();
                 updateIngredientList();
                 input.value = '';
             }
@@ -168,9 +179,8 @@
     
         function addStep() {
             const input = document.getElementById('stepInput');
-    
             if (input.value.trim() !== '') {
-                steps += (steps ? '\n' : '') + input.value.trim(); // No numbering here
+                steps += (steps ? '\n' : '') + input.value.trim();
                 updateStepList();
                 input.value = '';
             }
@@ -190,7 +200,7 @@
             stepArray.forEach((step, index) => {
                 const li = document.createElement('li');
                 li.className = 'list-item';
-                li.textContent = step; // Add the numbering only when rendering
+                li.textContent = step;
                 const removeBtn = document.createElement('button');
                 removeBtn.textContent = 'Remove';
                 removeBtn.className = 'remove-btn';

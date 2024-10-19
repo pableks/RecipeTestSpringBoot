@@ -96,7 +96,7 @@
             
             <div class="form-group">
                 <label>Ingredients:</label>
-                <input type="text" id="ingredientInput" placeholder="Enter an ingredient">
+                <input type="text" id="ingredientInput" placeholder="Enter an ingredient" onkeypress="handleKeyPress(event, 'ingredient')">
                 <button type="button" onclick="addIngredient()">Add Ingredient</button>
                 <ul id="ingredientList"></ul>
                 <input type="hidden" id="ingredientsInput" th:field="*{ingredients}">
@@ -104,7 +104,7 @@
             
             <div class="form-group">
                 <label>Preparation Steps:</label>
-                <input type="text" id="stepInput" placeholder="Enter a preparation step">
+                <input type="text" id="stepInput" placeholder="Enter a preparation step" onkeypress="handleKeyPress(event, 'step')">
                 <button type="button" onclick="addStep()">Add Step</button>
                 <ol id="stepList"></ol>
                 <input type="hidden" id="preparationInput" th:field="*{preparation}">
@@ -127,6 +127,17 @@
     
         if (steps == null) {
             steps = '';
+        }
+
+        function handleKeyPress(event, type) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                if (type === 'ingredient') {
+                    addIngredient();
+                } else if (type === 'step') {
+                    addStep();
+                }
+            }
         }
     
         function addIngredient() {
