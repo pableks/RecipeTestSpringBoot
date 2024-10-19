@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Create New Recipe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .list-item {
+            margin-bottom: 5px;
+        }
+        .remove-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 2px 5px;
+            margin-left: 10px;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Recipe</h1>
+        
+        <form th:action="@{/recipes/{id}(id=${recipe.id})}" th:object="${recipe}" method="post">
+            <div class="form-group">
+                <label for="name">Recipe Name:</label>
+                <input type="text" id="name" th:field="*{name}" required />
+            </div>
+            
+            <div class="form-group">
+                <label for="preparationTime">Preparation Time (minutes):</label>
+                <input type="number" id="preparationTime" th:field="*{preparationTime}" required />
+            </div>
+            
+            <div class="form-group">
+                <label for="difficulty">Difficulty:</label>
+                <select id="difficulty" th:field="*{difficulty}">
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Ingredients:</label>
+                <input type="text" id="ingredientInput" placeholder="Enter an ingredient">
+                <button type="button" onclick="addIngredient()">Add Ingredient</button>
+                <ul id="ingredientList"></ul>
+                <input type="hidden" id="ingredientsInput" th:field="*{ingredients}">
+            </div>
+            
+            <div class="form-group">
+                <label>Preparation Steps:</label>
+                <input type="text" id="stepInput" placeholder="Enter a preparation step">
+                <button type="button" onclick="addStep()">Add Step</button>
+                <ol id="stepList"></ol>
+                <input type="hidden" id="preparationInput" th:field="*{preparation}">
+            </div>
+            
+            <button type="submit">Edit Recipe</button>
+        </form>
+        
+        <a th:href="@{/recipes}" class="back-link">Back to Recipes</a>
+    </div>
+
+    <script th:inline="javascript">
+        let ingredients = /*[[${recipe.ingredients}]]*/ '' || '';
+        let steps = /*[[${recipe.preparation}]]*/ '' || '';
+    
+        // Ensure ingredients and steps are initialized as empty strings if null
+        if (ingredients == null) {
+            ingredients = '';
+        }
+    
+        if (steps == null) {
+            steps = '';
+        }
+    
+        function addIngredient() {
+            const input = document.getElementById('ingredientInput');
+            if (input.value.trim() !== '') {
+                ingredients += (ingredients ? '\n' : '') + input.value.trim(); // No bullet point here
+                updateIngredientList();
+                input.value = '';
+            }
+        }
+    
+        function removeIngredient(index) {
+            let ingredientArray = ingredients.split('\n');
+            ingredientArray.splice(index, 1);
+            ingredients = ingredientArray.join('\n');
+            updateIngredientList();
+        }
+    
+        function updateIngredientList() {
+            const list = document.getElementById('ingredientList');
+            list.innerHTML = '';
+            let ingredientArray = ingredients ? ingredients.split('\n') : [];
+            ingredientArray.forEach((ingredient, index) => {
+                const li = document.createElement('li');
+                li.className = 'list-item';
+                li.textContent = ingredient;
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = 'Remove';
+                removeBtn.className = 'remove-btn';
+                removeBtn.onclick = (e) => {
+                    e.preventDefault();
+                    removeIngredient(index);
+                };
+                li.appendChild(removeBtn);
+                list.appendChild(li);
+            });
+            document.getElementById('ingredientsInput').value = ingredients;
+        }
+    
+        function addStep() {
+            const input = document.getElementById('stepInput');
+    
+            if (input.value.trim() !== '') {
+                steps += (steps ? '\n' : '') + input.value.trim(); // No numbering here
+                updateStepList();
+                input.value = '';
+            }
+        }
+    
+        function removeStep(index) {
+            let stepArray = steps.split('\n');
+            stepArray.splice(index, 1);
+            steps = stepArray.join('\n');
+            updateStepList();
+        }
+    
+        function updateStepList() {
+            const list = document.getElementById('stepList');
+            list.innerHTML = '';
+            let stepArray = steps ? steps.split('\n') : [];
+            stepArray.forEach((step, index) => {
+                const li = document.createElement('li');
+                li.className = 'list-item';
+                li.textContent = step; // Add the numbering only when rendering
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = 'Remove';
+                removeBtn.className = 'remove-btn';
+                removeBtn.onclick = (e) => {
+                    e.preventDefault();
+                    removeStep(index);
+                };
+                li.appendChild(removeBtn);
+                list.appendChild(li);
+            });
+            document.getElementById('preparationInput').value = steps;
+        }
+    
+        // Initialize lists on page load
+        updateIngredientList();
+        updateStepList();
+    </script>
+    
+</body>
+</html>

@@ -105,7 +105,7 @@ public class RecipeController {
             }
             
             model.addAttribute("recipe", recipe);
-            return "recipe-form";
+            return "recipe-form-edit";
         } catch (IOException e) {
             model.addAttribute("error", "Error loading recipe for editing: " + e.getMessage());
             return "error";
