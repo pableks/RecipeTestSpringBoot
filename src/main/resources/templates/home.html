@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title th:text="${name}">Home</title>
+    <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+    <div class="container">
+        <h1 th:text="'Bienvenido a ' + ${name} + '!'"></h1>
+
+        <div sec:authorize="isAuthenticated()" class="user-greeting">
+            <h2 th:inline="text">Hola, [[${username}]]!</h2>
+            <p>Seguridad implementada con Spring Security</p>
+            <form th:action="@{/logout}" method="post">
+                <input type="submit" value="Logout" class="btn btn-logout"/>
+            </form>
+        </div>
+
+        <div sec:authorize="!isAuthenticated()">
+            <p>Por favor, inicia sesión para acceder a todas las funcionalidades.</p>
+            <a th:href="@{/login}" class="btn btn-primary">Ir a Login</a>
+        </div>
+    </div>
+</body>
+</html>
