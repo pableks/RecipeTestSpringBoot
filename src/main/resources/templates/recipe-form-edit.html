@@ -65,20 +65,42 @@
             align-items: center;
             margin-bottom: 5px;
             position: relative;
-            padding-left: 25px; /* Space for the drag handle */
-            padding-right: 70px; /* Space for the remove button */
+            padding-left: 25px;
+            padding-right: 70px;
+            transition: box-shadow 0.2s ease;
+            touch-action: none;
+            background-color: #fff;
+            cursor: default;
         }
 
         .drag-handle {
-            opacity: 0.5;
+            opacity: 0;
             padding-right: 5px;
             cursor: move;
             user-select: none;
-            touch-action: none;
             position: absolute;
             left: 0;
             top: 50%;
             transform: translateY(-50%);
+            transition: opacity 0.2s ease;
+        }
+
+        .list-item:hover .drag-handle {
+            opacity: 0.5;
+        }
+
+        .dragging {
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .dragging .drag-handle,
+        .touch-dragging .drag-handle {
+            opacity: 0.5 !important;
+        }
+
+        body.dragging .list-item:not(.dragging) .drag-handle {
+            opacity: 0 !important;
         }
 
         .list-item-content {
@@ -316,75 +338,59 @@
         }
 
         let draggedItem = null;
-        let touchY = 0;
-        let initialY = 0;
+        let isDragging = false;
+        let startY, currentY;
 
-        function dragStart(e) {
-            e.dataTransfer.setData('text/plain', e.target.dataset.index);
-            e.target.classList.add('dragging');
-            draggedItem = e.target;
+        function initDrag(e, isTouchEvent) {
+            const target = isTouchEvent ? e.touches[0].target : e.target;
+            if (!target.closest('.drag-handle')) return;
+            
+            e.preventDefault();
+            isDragging = true;
+            document.body.classList.add('dragging');
+            draggedItem = target.closest('.list-item');
+            draggedItem.classList.add('dragging');
+            
+            startY = isTouchEvent ? e.touches[0].clientY : e.clientY;
+            currentY = startY;
+
+            document.addEventListener(isTouchEvent ? 'touchmove' : 'mousemove', moveDrag);
+            document.addEventListener(isTouchEvent ? 'touchend' : 'mouseup', endDrag);
         }
 
-        function dragOver(e) {
+        function moveDrag(e) {
+            if (!isDragging) return;
             e.preventDefault();
-            const list = e.target.closest('ul, ol');
-            const afterElement = getDragAfterElement(list, e.clientY);
-            if (afterElement) {
+            
+            currentY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            const deltaY = currentY - startY;
+            
+            const list = draggedItem.closest('ul, ol');
+            const afterElement = getDragAfterElement(list, currentY);
+            if (afterElement && afterElement !== draggedItem.nextElementSibling) {
                 list.insertBefore(draggedItem, afterElement);
-            } else {
+            } else if (!afterElement && draggedItem !== list.lastElementChild) {
                 list.appendChild(draggedItem);
             }
+            
+            startY = currentY;
         }
 
-        function drop(e) {
-            e.preventDefault();
-            const type = draggedItem.dataset.type;
-            updateListOrder(type);
-        }
-
-        function dragEnd(e) {
-            e.target.classList.remove('dragging');
-            draggedItem = null;
-        }
-
-        function touchStart(e) {
-            if (e.touches.length === 1) {
-                e.preventDefault(); // Prevent scrolling
-                const touch = e.touches[0];
-                draggedItem = e.target.closest('.list-item');
-                initialY = touch.clientY - draggedItem.offsetTop;
-                touchY = touch.clientY;
-                draggedItem.classList.add('dragging');
-            }
-        }
-
-        function touchMove(e) {
-            if (draggedItem) {
-                e.preventDefault();
-                const touch = e.touches[0];
-                const list = draggedItem.closest('ul, ol');
-                const currentY = touch.clientY - initialY;
-                draggedItem.style.position = 'absolute';
-                draggedItem.style.top = `${currentY}px`;
-
-                const afterElement = getDragAfterElement(list, touch.clientY);
-                if (afterElement) {
-                    list.insertBefore(draggedItem, afterElement);
-                } else {
-                    list.appendChild(draggedItem);
-                }
-            }
-        }
-
-        function touchEnd(e) {
+        function endDrag(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            document.body.classList.remove('dragging');
             if (draggedItem) {
                 draggedItem.classList.remove('dragging');
-                draggedItem.style.position = '';
-                draggedItem.style.top = '';
                 const type = draggedItem.dataset.type;
                 updateListOrder(type);
                 draggedItem = null;
             }
+
+            document.removeEventListener('mousemove', moveDrag);
+            document.removeEventListener('mouseup', endDrag);
+            document.removeEventListener('touchmove', moveDrag);
+            document.removeEventListener('touchend', endDrag);
         }
 
         function getDragAfterElement(container, y) {
@@ -411,11 +417,41 @@
                 updateStepList();
             }
         }
+
+        function createListItem(content, index, type) {
+            const li = document.createElement('li');
+            li.className = 'list-item';
+            li.dataset.index = index;
+            li.dataset.type = type;
+
+            const dragHandle = document.createElement('span');
+            dragHandle.className = 'drag-handle';
+            dragHandle.innerHTML = '&#9776;'; // Hamburger icon
+            li.appendChild(dragHandle);
+
+            const textSpan = document.createElement('span');
+            textSpan.textContent = content;
+            li.appendChild(textSpan);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = 'Remove';
+            removeBtn.className = 'remove-btn';
+            removeBtn.onclick = (e) => {
+                e.preventDefault();
+                if (type === 'ingredient') removeIngredient(index);
+                else removeStep(index);
+            };
+            li.appendChild(removeBtn);
+
+            li.addEventListener('mousedown', (e) => initDrag(e, false));
+            li.addEventListener('touchstart', (e) => initDrag(e, true), { passive: false });
+
+            return li;
+        }
     
         // Initialize lists on page load
         updateIngredientList();
         updateStepList();
     </script>
-    
 </body>
 </html>
