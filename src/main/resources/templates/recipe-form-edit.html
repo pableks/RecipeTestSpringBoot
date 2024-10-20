@@ -50,23 +50,109 @@
         button:hover {
             background-color: #45a049;
         }
-        .list-item {
-            margin-bottom: 5px;
-        }
-        .remove-btn {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            padding: 2px 5px;
-            margin-left: 10px;
-            cursor: pointer;
-            border-radius: 2px;
-        }
         .back-link {
             display: inline-block;
             margin-top: 20px;
             color: #3498db;
             text-decoration: none;
+        }
+        .list-item.dragging {
+            opacity: 0.5;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            position: relative;
+            padding-left: 25px; /* Space for the drag handle */
+            padding-right: 70px; /* Space for the remove button */
+        }
+
+        .drag-handle {
+            opacity: 0.5;
+            padding-right: 5px;
+            cursor: move;
+            user-select: none;
+            touch-action: none;
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .list-item-content {
+            flex-grow: 1;
+            margin-right: 10px; /* Space between content and remove button */
+        }
+  
+        .remove-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 2px 5px;
+            cursor: pointer;
+            border-radius: 2px;
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        #ingredientList {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        #stepList {
+            list-style-type: none;
+            padding-left: 0;
+            counter-reset: step-counter;
+        }
+
+        #ingredientList .list-item {
+            padding-left: 40px; /* Increased padding to accommodate bullet and drag handle */
+        }
+
+        #ingredientList .list-item::before {
+            content: "●";
+            position: absolute;
+            left: 20px; /* Position bullet after drag handle */
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: #333;
+        }
+
+        #stepList .list-item {
+            counter-increment: step-counter;
+            padding-left: 45px; /* Increased padding to accommodate number and drag handle */
+        }
+
+        #stepList .list-item::before {
+            content: counter(step-counter) ". ";
+            position: absolute;
+            left: 20px; /* Position number after drag handle */
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            input[type="text"],
+            input[type="number"],
+            select,
+            textarea {
+                font-size: 16px; /* Prevents zoom on focus in iOS */
+            }
+            .list-item {
+                flex-wrap: wrap;
+            }
+            .remove-btn {
+                margin-left: auto;
+            }
         }
     </style>
 </head>
@@ -121,22 +207,14 @@
         let steps = /*[[${recipe.preparation}]]*/ '' || '';
     
         // Ensure ingredients and steps are initialized as empty strings if null
-        if (ingredients == null) {
-            ingredients = '';
-        }
-    
-        if (steps == null) {
-            steps = '';
-        }
+        if (ingredients == null) ingredients = '';
+        if (steps == null) steps = '';
     
         function handleKeyPress(event, type) {
             if (event.key === 'Enter') {
                 event.preventDefault();
-                if (type === 'ingredient') {
-                    addIngredient();
-                } else if (type === 'step') {
-                    addStep();
-                }
+                if (type === 'ingredient') addIngredient();
+                else if (type === 'step') addStep();
             }
         }
 
@@ -161,17 +239,7 @@
             list.innerHTML = '';
             let ingredientArray = ingredients ? ingredients.split('\n') : [];
             ingredientArray.forEach((ingredient, index) => {
-                const li = document.createElement('li');
-                li.className = 'list-item';
-                li.textContent = ingredient;
-                const removeBtn = document.createElement('button');
-                removeBtn.textContent = 'Remove';
-                removeBtn.className = 'remove-btn';
-                removeBtn.onclick = (e) => {
-                    e.preventDefault();
-                    removeIngredient(index);
-                };
-                li.appendChild(removeBtn);
+                const li = createListItem(ingredient, index, 'ingredient');
                 list.appendChild(li);
             });
             document.getElementById('ingredientsInput').value = ingredients;
@@ -198,20 +266,150 @@
             list.innerHTML = '';
             let stepArray = steps ? steps.split('\n') : [];
             stepArray.forEach((step, index) => {
-                const li = document.createElement('li');
-                li.className = 'list-item';
-                li.textContent = step;
-                const removeBtn = document.createElement('button');
-                removeBtn.textContent = 'Remove';
-                removeBtn.className = 'remove-btn';
-                removeBtn.onclick = (e) => {
-                    e.preventDefault();
-                    removeStep(index);
-                };
-                li.appendChild(removeBtn);
+                const li = createListItem(step, index, 'step');
                 list.appendChild(li);
             });
             document.getElementById('preparationInput').value = steps;
+        }
+
+        function createListItem(content, index, type) {
+
+            
+            const li = document.createElement('li');
+            li.className = 'list-item';
+            li.draggable = true;
+            li.dataset.index = index;
+            li.dataset.type = type;
+
+            const dragHandle = document.createElement('span');
+            dragHandle.className = 'drag-handle';
+            dragHandle.innerHTML = '&#9776;'; // Hamburger icon
+            li.appendChild(dragHandle);
+            
+            
+
+            const textSpan = document.createElement('span');
+            textSpan.textContent = content;
+            li.appendChild(textSpan);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = 'Remove';
+            removeBtn.className = 'remove-btn';
+            removeBtn.onclick = (e) => {
+                e.preventDefault();
+                if (type === 'ingredient') removeIngredient(index);
+                else removeStep(index);
+            };
+            li.appendChild(removeBtn);
+
+            li.addEventListener('dragstart', dragStart);
+            li.addEventListener('dragover', dragOver);
+            li.addEventListener('drop', drop);
+            li.addEventListener('dragend', dragEnd);
+
+            // Touch event listeners for mobile support
+            li.addEventListener('touchstart', touchStart, {passive: false});
+            li.addEventListener('touchmove', touchMove, {passive: false});
+            li.addEventListener('touchend', touchEnd);
+
+            return li;
+        }
+
+        let draggedItem = null;
+        let touchY = 0;
+        let initialY = 0;
+
+        function dragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.index);
+            e.target.classList.add('dragging');
+            draggedItem = e.target;
+        }
+
+        function dragOver(e) {
+            e.preventDefault();
+            const list = e.target.closest('ul, ol');
+            const afterElement = getDragAfterElement(list, e.clientY);
+            if (afterElement) {
+                list.insertBefore(draggedItem, afterElement);
+            } else {
+                list.appendChild(draggedItem);
+            }
+        }
+
+        function drop(e) {
+            e.preventDefault();
+            const type = draggedItem.dataset.type;
+            updateListOrder(type);
+        }
+
+        function dragEnd(e) {
+            e.target.classList.remove('dragging');
+            draggedItem = null;
+        }
+
+        function touchStart(e) {
+            if (e.touches.length === 1) {
+                e.preventDefault(); // Prevent scrolling
+                const touch = e.touches[0];
+                draggedItem = e.target.closest('.list-item');
+                initialY = touch.clientY - draggedItem.offsetTop;
+                touchY = touch.clientY;
+                draggedItem.classList.add('dragging');
+            }
+        }
+
+        function touchMove(e) {
+            if (draggedItem) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const list = draggedItem.closest('ul, ol');
+                const currentY = touch.clientY - initialY;
+                draggedItem.style.position = 'absolute';
+                draggedItem.style.top = `${currentY}px`;
+
+                const afterElement = getDragAfterElement(list, touch.clientY);
+                if (afterElement) {
+                    list.insertBefore(draggedItem, afterElement);
+                } else {
+                    list.appendChild(draggedItem);
+                }
+            }
+        }
+
+        function touchEnd(e) {
+            if (draggedItem) {
+                draggedItem.classList.remove('dragging');
+                draggedItem.style.position = '';
+                draggedItem.style.top = '';
+                const type = draggedItem.dataset.type;
+                updateListOrder(type);
+                draggedItem = null;
+            }
+        }
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.list-item:not(.dragging)')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        function updateListOrder(type) {
+            const list = document.getElementById(type === 'ingredient' ? 'ingredientList' : 'stepList');
+            const items = Array.from(list.children).map(item => item.querySelector('span:not(.drag-handle)').textContent);
+            if (type === 'ingredient') {
+                ingredients = items.join('\n');
+                updateIngredientList();
+            } else {
+                steps = items.join('\n');
+                updateStepList();
+            }
         }
     
         // Initialize lists on page load
