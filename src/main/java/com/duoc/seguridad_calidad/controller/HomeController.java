@@ -18,6 +18,7 @@ public class HomeController {
 
     @GetMapping({"/", "/home"})
     public String home(Model model) {
+        model.addAttribute("name", "RecetApp");
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
         model.addAttribute("username", username);
