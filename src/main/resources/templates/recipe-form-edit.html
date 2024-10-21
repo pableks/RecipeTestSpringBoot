@@ -26,24 +26,28 @@
             margin-bottom: 20px;
         }
 
+        .list-container {
+            position: relative;
+            width: 100%;
+        }
+
         .list {
+            width: 100%;
             display: flex;
             flex-direction: column;
-            width: 100%;
-            gap: 10px 0;
+            gap: 4px 0;
             max-height: fit-content;
         }
 
         .list__item {
             width: 100%;
             background: white;
-            padding: 15px;
+            padding: 10px 15px;
             border-radius: 5px;
             color: #001d29;
             font-weight: 500;
-            font-size: 18px;
-            font-size: 18px;
-            max-height: calc(fit-content - 40px);
+            font-size: 16px;
+            max-height: calc(fit-content - 20px);
             display: flex;
             align-items: center;
             position: relative;
@@ -52,13 +56,14 @@
 
         .drag-handle {
             position: absolute;
-            right: 0;
+            right: 15px;
             width: 44px;
             height: 44px;
             display: flex;
             justify-content: center;
             align-items: center;
         }
+
 
         .drag-handle::after {
             content: '⠿';
@@ -81,6 +86,26 @@
 
         .list__item.is-draggable {
             z-index: 10;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 5px;
+            position: absolute;
+            right: -110px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .edit-btn, .remove-btn {
+            padding: 2px 5px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .item-content {
+            flex-grow: 1;
+            padding-right: 44px; /* Width of the drag handle */
         }
     </style>
 </head>
@@ -112,7 +137,9 @@
                 <label>Ingredients:</label>
                 <input type="text" id="ingredientInput" placeholder="Enter an ingredient" onkeypress="handleKeyPress(event, 'ingredient')">
                 <button type="button" onclick="addIngredient()">Add Ingredient</button>
-                <ul id="ingredientList" class="list js-list" data-list-type="ingredient"></ul>
+                <div class="list-container">
+                    <ul id="ingredientList" class="list js-list" data-list-type="ingredient"></ul>
+                </div>
                 <input type="hidden" id="ingredientsInput" th:field="*{ingredients}">
             </div>
             
@@ -120,7 +147,9 @@
                 <label>Preparation Steps:</label>
                 <input type="text" id="stepInput" placeholder="Enter a preparation step" onkeypress="handleKeyPress(event, 'step')">
                 <button type="button" onclick="addStep()">Add Step</button>
-                <ol id="stepList" class="list js-list" data-list-type="step"></ol>
+                <div class="list-container">
+                    <ol id="stepList" class="list js-list" data-list-type="step"></ol>
+                </div>
                 <input type="hidden" id="preparationInput" th:field="*{preparation}">
             </div>
             
@@ -464,11 +493,93 @@ function createListItem(text, isStep, stepNumber) {
     const listItem = document.createElement('li');
     listItem.className = 'list__item is-idle js-item';
     listItem.innerHTML = `
-        <span>${isStep ? `${stepNumber}. ${text}` : text}</span>
+        <span class="item-content">${isStep ? `${stepNumber}. ${text}` : text}</span>
         <div class="drag-handle js-drag-handle"></div>
+        <div class="item-actions">
+            <button type="button" class="edit-btn" onclick="editItem(this)">Edit</button>
+            <button type="button" class="remove-btn" onclick="removeItem(this)">Remove</button>
+        </div>
     `;
     return listItem;
 }
+
+function editItem(button) {
+    const listItem = button.closest('.list__item');
+    const content = listItem.querySelector('.item-content');
+    const text = content.textContent.replace(/^\d+\.\s*/, '');
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = text;
+    input.className = 'edit-input';
+    
+    const saveButton = document.createElement('button');
+    saveButton.textContent = 'Save';
+    saveButton.className = 'save-btn';
+    saveButton.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        finishEditing(input);
+    };
+
+    input.onkeypress = function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            finishEditing(input);
+        }
+    };
+
+    content.innerHTML = '';
+    content.appendChild(input);
+    content.appendChild(saveButton);
+    input.focus();
+
+    // Hide the edit and remove buttons while editing
+    const actionButtons = listItem.querySelectorAll('.edit-btn, .remove-btn');
+    actionButtons.forEach(btn => btn.style.display = 'none');
+}
+
+function finishEditing(input) {
+    const listItem = input.closest('.list__item');
+    const content = listItem.querySelector('.item-content');
+    let text = input.value.trim();
+    
+    if (text === '') {
+        alert('Item cannot be empty. Please enter some text or remove the item.');
+        input.focus();
+        return;
+    }
+
+    if (listItem.closest('#stepList')) {
+        const stepNumber = Array.from(listItem.parentNode.children).indexOf(listItem) + 1;
+        text = `${stepNumber}. ${text}`;
+    }
+    content.textContent = text;
+    updateHiddenInput(listItem.closest('.list').id);
+    if (listItem.closest('#stepList')) {
+        updateStepNumbers();
+    }
+
+    // Show the edit and remove buttons again
+    const actionButtons = listItem.querySelectorAll('.edit-btn, .remove-btn');
+    actionButtons.forEach(btn => btn.style.display = '');
+}
+
+// Prevent form submission when clicking buttons inside the form
+document.querySelector('form').addEventListener('click', function(e) {
+    if (e.target.tagName === 'BUTTON' && e.target.type !== 'submit') {
+        e.preventDefault();
+    }
+});
+
+    function removeItem(button) {
+        const listItem = button.closest('.list__item');
+        const list = listItem.closest('.list');
+        listItem.remove();
+        updateHiddenInput(list.id);
+        if (list.id === 'stepList') {
+            updateStepNumbers();
+        }
+    }
 
 function updateHiddenInput(listId) {
     const list = document.getElementById(listId);
