@@ -10,12 +10,17 @@
         }
 
         body {
-            font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.5;
             font-weight: 400;
-            background: #e7f3ff;
+            background: #f0f2f5;
         }
 
+        h1 {
+            color: #1877f2;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
         .container {
             max-width: 500px;
             margin: 0 auto;
@@ -133,6 +138,49 @@
             padding: 5px 10px;
             font-size: 14px;
             cursor: pointer;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #1877f2;
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #166fe5;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .input-group input {
+            flex: 1;
+        }
+
+        .input-group .btn {
+            white-space: nowrap;
         }
     </style>
 </head>

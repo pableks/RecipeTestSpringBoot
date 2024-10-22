@@ -1,72 +1,186 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Create New Recipe</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Recipe</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.5;
+            font-weight: 400;
+            background: #f0f2f5;
+        }
+
+        h1 {
+            color: #1877f2;
+            margin-bottom: 1rem;
+            font-size: 2rem;
         }
         .container {
-            max-width: 800px;
+            max-width: 500px;
             margin: 0 auto;
-            background-color: #fff;
             padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        h1 {
-            color: #333;
-        }
+
         .form-group {
             margin-bottom: 20px;
         }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="text"],
-        input[type="number"],
-        select,
-        textarea {
+
+        .list-container {
+            position: relative;
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
         }
-        button {
-            background-color: #4CAF50;
-            color: white;
+
+        .list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 4px 0;
+            max-height: fit-content;
+        }
+
+        .list__item.is-editing {
+            pointer-events: all !important;
+            cursor: default !important;
+        }
+        
+        .list__item.is-editing .drag-handle {
+            display: none !important;
+        }
+        
+        .edit-input:focus {
+            outline: 2px solid #007bff;
+            border-radius: 4px;
+        }
+
+        .list__item {
+            width: 100%;
+            background: white;
             padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
+            border-radius: 5px;
+            color: #001d29;
+            font-weight: 500;
+            font-size: 16px;
+            max-height: calc(fit-content - 20px);
+            display: flex;
+            align-items: center;
+            position: relative;
+            will-change: transform;
+        }
+
+        .drag-handle {
+            position: absolute;
+            right: 15px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+
+        .drag-handle::after {
+            content: '⠿';
+            font-size: 25px;
+            color: #00000099;
+        }
+
+        .list__item.is-idle .drag-handle {
+            cursor: grab;
+        }
+
+        .list__item.is-idle {
+            transition: 0.25s ease transform;
+        }
+
+        .list__item.is-draggable,
+        .list__item.is-draggable .drag-handle {
+            cursor: grabbing;
+        }
+
+        .list__item.is-draggable {
+            z-index: 10;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 5px;
+            position: absolute;
+            right: -110px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .edit-btn, .remove-btn {
+            padding: 2px 5px;
+            font-size: 12px;
             cursor: pointer;
         }
-        button:hover {
-            background-color: #45a049;
+
+        .item-content {
+            flex-grow: 1;
+            padding-right: 44px; /* Width of the drag handle */
         }
-        .list-item {
-            margin-bottom: 5px;
+
+        .edit-input {
+            width: calc(100% - 60px); /* Adjust based on your layout */
+            font-size: 16px;
+            padding: 5px;
+            margin-right: 5px;
         }
-        .remove-btn {
-            background-color: #f44336;
+
+        .save-btn {
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #1877f2;
             color: white;
             border: none;
-            padding: 2px 5px;
-            margin-left: 10px;
-            cursor: pointer;
-            border-radius: 2px;
         }
-        .back-link {
-            display: inline-block;
-            margin-top: 20px;
-            color: #3498db;
-            text-decoration: none;
+
+        .btn-primary:hover {
+            background-color: #166fe5;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .input-group input {
+            flex: 1;
+        }
+
+        .input-group .btn {
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -96,129 +210,537 @@
             
             <div class="form-group">
                 <label>Ingredients:</label>
-                <input type="text" id="ingredientInput" placeholder="Enter an ingredient" onkeypress="handleKeyPress(event, 'ingredient')">
-                <button type="button" onclick="addIngredient()">Add Ingredient</button>
-                <ul id="ingredientList"></ul>
+                <div class="input-group">
+                    <input type="text" id="ingredientInput" placeholder="Enter an ingredient" onkeypress="handleKeyPress(event, 'ingredient')">
+                    <button type="button" class="btn btn-primary" onclick="addIngredient()">Add Ingredient</button>
+                </div>
+                <div class="list-container">
+                    <ul id="ingredientList" class="list js-list" data-list-type="ingredient"></ul>
+                </div>
                 <input type="hidden" id="ingredientsInput" th:field="*{ingredients}">
             </div>
             
             <div class="form-group">
                 <label>Preparation Steps:</label>
+                <div class="input-group">
                 <input type="text" id="stepInput" placeholder="Enter a preparation step" onkeypress="handleKeyPress(event, 'step')">
-                <button type="button" onclick="addStep()">Add Step</button>
-                <ol id="stepList"></ol>
+                <button type="button"  class="btn btn-primary" onclick="addStep()">Add Step</button>
+            </div>
+                <div class="list-container">
+                    <ol id="stepList" class="list js-list" data-list-type="step"></ol>
+                </div>
                 <input type="hidden" id="preparationInput" th:field="*{preparation}">
             </div>
             
-            <button type="submit">Create Recipe</button>
+            <button type="submit"  class="btn btn-primary">Create Recipe</button>
         </form>
         
         <a th:href="@{/recipes}" class="back-link">Back to Recipes</a>
     </div>
 
     <script th:inline="javascript">
-        let ingredients = /*[[${recipe.ingredients}]]*/ '' || '';
-        let steps = /*[[${recipe.preparation}]]*/ '' || '';
-    
-        // Ensure ingredients and steps are initialized as empty strings if null
-        if (ingredients == null) {
-            ingredients = '';
-        }
-    
-        if (steps == null) {
-            steps = '';
-        }
+       let draggableItem;
+let pointerStartY;
+let itemsGap = 0;
+let currentList;
+let initialIndex;
+let newPosition;
+let isDragging = false;
+let dragStartTimer;
 
-        function handleKeyPress(event, type) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                if (type === 'ingredient') {
-                    addIngredient();
-                } else if (type === 'step') {
-                    addStep();
-                }
+function setup() {
+    listContainers = document.querySelectorAll('.js-list');
+    if (!listContainers.length) return;
+
+    listContainers.forEach(container => {
+        container.addEventListener('mousedown', handleDragStart);
+        container.addEventListener('touchstart', handleDragStart, { passive: false });
+    });
+
+    document.addEventListener('mouseup', handleDragEnd);
+    document.addEventListener('touchend', handleDragEnd);
+
+    // Initialize lists with existing data
+    const recipeIngredients = /*[[${recipe.ingredients}]]*/ '';
+    const recipePreparation = /*[[${recipe.preparation}]]*/ '';
+    
+    initializeList('ingredientList', recipeIngredients);
+    initializeList('stepList', recipePreparation);
+}
+
+function initializeList(listId, items) {
+    const list = document.getElementById(listId);
+    list.innerHTML = ''; // Clear existing items
+    
+    let parsedItems = parseItems(items);
+    
+    parsedItems.forEach((item, index) => {
+        const listItem = createListItem(item, listId === 'stepList', index + 1);
+        list.appendChild(listItem);
+    });
+    
+    updateHiddenInput(listId);
+    if (listId === 'stepList') {
+        updateStepNumbers();
+    }
+}
+
+function parseItems(items) {
+    if (typeof items === 'string') {
+        try {
+            return JSON.parse(items);
+        } catch (e) {
+            // If it's not valid JSON, split by newlines
+            return items.split('\n').map(item => item.trim()).filter(item => item !== '');
+        }
+    }
+    return Array.isArray(items) ? items : [];
+}
+
+function handleDragStart(e) {
+    if (e.type === 'mousedown' && e.button !== 0) return; // Only handle left mouse button
+    
+    // Check if any item is currently being edited
+    const editingItem = document.querySelector('.edit-input');
+    if (editingItem) {
+        return; // Prevent drag if an item is being edited
+    }
+
+    const target = e.type === 'touchstart' ? document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY) : e.target;
+    
+    if (target.classList.contains('js-drag-handle')) {
+        e.preventDefault(); // Prevent default for both mouse and touch events
+        draggableItem = target.closest('.js-item');
+        currentList = draggableItem.closest('.js-list');
+        pointerStartY = e.clientY || e.touches[0].clientY;
+        
+        // Set a small delay before initiating drag
+        dragStartTimer = setTimeout(() => {
+            dragStart(e);
+            if (e.type === 'mousedown') {
+                document.addEventListener('mousemove', drag);
+            } else {
+                document.addEventListener('touchmove', drag, { passive: false });
             }
+        }, 100);
+
+        if (e.type === 'mousedown') {
+            document.addEventListener('mouseup', cancelDragStart);
+        } else {
+            document.addEventListener('touchend', cancelDragStart);
         }
+    }
+}
+
+function cancelDragStart() {
+    clearTimeout(dragStartTimer);
+    document.removeEventListener('mouseup', cancelDragStart);
+    document.removeEventListener('touchend', cancelDragStart);
+}
+
+function dragStart(e) {
+    if (!draggableItem) return;
+
+    initialIndex = Array.from(currentList.children).indexOf(draggableItem);
+    newPosition = initialIndex;
+
+    setItemsGap();
+    //disablePageScroll();
+    initDraggableItem();
+    draggableItem.style.zIndex = '1000';
+}
+
+function drag(e) {
+    if (!draggableItem) return;
+
+    e.preventDefault();
+    isDragging = true;
+
+    const clientY = e.clientY || e.touches[0].clientY;
+    const pointerOffsetY = clientY - pointerStartY;
+
+    draggableItem.style.transform = `translateY(${pointerOffsetY}px)`;
+
+    updateIdleItemsStateAndPosition(pointerOffsetY);
+    detectNewPosition(pointerOffsetY);
+}
+
+function handleDragEnd(e) {
+    cancelDragStart();
+    dragEnd();
+}
+
+function dragEnd() {
+    if (!draggableItem) return;
+
+    document.removeEventListener('mousemove', drag);
+    document.removeEventListener('touchmove', drag);
+
+    if (!isDragging) {
+        cleanup();
+        return;
+    }
+
+    isDragging = false;
+
+    const items = Array.from(currentList.children);
+    const currentIndex = items.indexOf(draggableItem);
+
+    let finalY = 0;
+    if (newPosition > currentIndex) {
+        for (let i = currentIndex + 1; i <= newPosition; i++) {
+            finalY += items[i].offsetHeight + itemsGap;
+        }
+    } else if (newPosition < currentIndex) {
+        for (let i = newPosition; i < currentIndex; i++) {
+            finalY -= items[i].offsetHeight + itemsGap;
+        }
+    }
+
+    draggableItem.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
+    draggableItem.style.transform = `translateY(${finalY}px)`;
+
+    setTimeout(() => {
+        draggableItem.style.transition = '';
+        draggableItem.style.transform = '';
+        draggableItem.style.zIndex = '';
+        if (newPosition !== initialIndex) {
+            applyNewItemsOrder();
+        } else {
+            resetItemsPosition();
+        }
+        cleanup();
+    }, 300);
+}
+
+function detectNewPosition(pointerOffsetY) {
+    const items = Array.from(currentList.children);
+    const draggableRect = draggableItem.getBoundingClientRect();
+    const draggableCenter = draggableRect.top + draggableRect.height / 2;
+
+    newPosition = initialIndex;
+
+    for (let i = 0; i < items.length; i++) {
+        if (items[i] === draggableItem) continue;
+        const itemRect = items[i].getBoundingClientRect();
+        const itemCenter = itemRect.top + itemRect.height / 2;
+        if (draggableCenter < itemCenter && i < initialIndex) {
+            newPosition = i;
+            break;
+        } else if (draggableCenter > itemCenter && i > initialIndex) {
+            newPosition = i;
+        }
+    }
+}
+
+function updateIdleItemsStateAndPosition(pointerOffsetY) {
+    const items = Array.from(currentList.children);
+    const draggableRect = draggableItem.getBoundingClientRect();
+
+    items.forEach((item, index) => {
+        if (item === draggableItem) return;
+
+        const itemRect = item.getBoundingClientRect();
+        const itemCenter = itemRect.top + itemRect.height / 2;
+        const draggableCenter = draggableRect.top + pointerOffsetY + draggableRect.height / 2;
+
+        if (index < initialIndex && index >= newPosition && draggableCenter < itemCenter) {
+            item.style.transform = `translateY(${draggableRect.height + itemsGap}px)`;
+        } else if (index > initialIndex && index <= newPosition && draggableCenter > itemCenter) {
+            item.style.transform = `translateY(-${draggableRect.height + itemsGap}px)`;
+        } else {
+            item.style.transform = '';
+        }
+    });
+}
+
+function applyNewItemsOrder() {
+    const items = Array.from(currentList.children);
+    items.splice(initialIndex, 1);
+    items.splice(newPosition, 0, draggableItem);
+    items.forEach(item => currentList.appendChild(item));
+
+    if (currentList.id === 'stepList') {
+        updateStepNumbers();
+    }
+
+    updateHiddenInput(currentList.id);
+}
+
+function resetItemsPosition() {
+    const items = Array.from(currentList.children);
+    items.forEach(item => {
+        item.style.transform = '';
+    });
+}
+
+function cleanup() {
+    itemsGap = 0;
+    unsetItemState();
+    enablePageScroll();
+
+    document.removeEventListener('mousemove', drag);
+    document.removeEventListener('touchmove', drag);
     
-        function addIngredient() {
-            const input = document.getElementById('ingredientInput');
-            if (input.value.trim() !== '') {
-                ingredients += (ingredients ? '\n' : '') + input.value.trim(); // No bullet point here
-                updateIngredientList();
-                input.value = '';
+    draggableItem = null;
+    currentList = null;
+    initialIndex = null;
+    newPosition = null;
+    isDragging = false;
+}
+
+function setItemsGap() {
+    const idleItems = getIdleItems(currentList);
+    if (idleItems.length <= 1) {
+        itemsGap = 0;
+        return;
+    }
+
+    const item1Rect = idleItems[0].getBoundingClientRect();
+    const item2Rect = idleItems[1].getBoundingClientRect();
+
+    itemsGap = Math.abs(item1Rect.bottom - item2Rect.top);
+}
+
+function disablePageScroll() {
+    document.body.style.overflow = 'scroll';
+    document.body.style.touchAction = 'none';
+    document.body.style.userSelect = 'none';
+}
+
+function initDraggableItem() {
+    draggableItem.classList.remove('is-idle');
+    draggableItem.classList.add('is-draggable');
+}
+
+function unsetItemState() {
+    getIdleItems(currentList).forEach((item) => {
+        delete item.dataset.isAbove;
+        delete item.dataset.isToggled;
+        item.style.transform = '';
+    });
+    if (draggableItem) {
+        draggableItem.classList.remove('is-draggable');
+        draggableItem.classList.add('is-idle');
+    }
+}
+
+function enablePageScroll() {
+    document.body.style.overflow = '';
+    document.body.style.touchAction = '';
+    document.body.style.userSelect = '';
+}
+
+function getAllItems(list) {
+    return Array.from(list.querySelectorAll('.js-item'));
+}
+
+function getIdleItems(list) {
+    return getAllItems(list).filter((item) => item.classList.contains('is-idle'));
+}
+
+function handleKeyPress(event, type) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        if (type === 'ingredient') {
+            addIngredient();
+        } else if (type === 'step') {
+            addStep();
+        }
+    }
+}
+
+function addIngredient() {
+    const input = document.getElementById('ingredientInput');
+    if (input.value.trim() !== '') {
+        const list = document.getElementById('ingredientList');
+        const listItem = createListItem(input.value, false);
+        list.appendChild(listItem);
+        input.value = '';
+        updateHiddenInput('ingredientList');
+    }
+}
+
+function addStep() {
+    const input = document.getElementById('stepInput');
+    if (input.value.trim() !== '') {
+        const list = document.getElementById('stepList');
+        const stepNumber = list.children.length + 1;
+        const listItem = createListItem(input.value, true, stepNumber);
+        list.appendChild(listItem);
+        input.value = '';
+        updateHiddenInput('stepList');
+        updateStepNumbers();
+    }
+}
+
+function createListItem(text, isStep, stepNumber) {
+    const listItem = document.createElement('li');
+    listItem.className = 'list__item is-idle js-item';
+    listItem.innerHTML = `
+        <span class="item-content">${isStep ? `${stepNumber}. ${text}` : text}</span>
+        <div class="drag-handle js-drag-handle"></div>
+        <div class="item-actions">
+            <button type="button" class="edit-btn" onclick="editItem(this)">Edit</button>
+            <button type="button" class="remove-btn" onclick="removeItem(this)">Remove</button>
+        </div>
+    `;
+    return listItem;
+}
+
+function editItem(button) {
+    const listItem = button.closest('.list__item');
+    
+    // Check if already editing
+    if (listItem.querySelector('.edit-input')) {
+        return;
+    }
+    
+    const content = listItem.querySelector('.item-content');
+    const text = content.textContent.replace(/^\d+\.\s*/, '');
+    
+    // Add editing class to the list item
+    listItem.classList.add('is-editing');
+    
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = text;
+    input.className = 'edit-input';
+    
+    const saveButton = document.createElement('button');
+    saveButton.textContent = 'Save';
+    saveButton.className = 'save-btn';
+    saveButton.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        finishEditing(input);
+    };
+
+    input.onkeypress = function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            finishEditing(input);
+        }
+    };
+
+    // Add blur event to save when clicking outside
+    input.onblur = function(e) {
+        // Small timeout to allow save button click to process
+        setTimeout(() => {
+            if (listItem.contains(document.querySelector('.edit-input'))) {
+                finishEditing(input);
             }
+        }, 200);
+    };
+
+    content.innerHTML = '';
+    content.appendChild(input);
+    content.appendChild(saveButton);
+    input.focus();
+
+    // Adjust list item layout for editing
+    listItem.style.display = 'flex';
+    listItem.style.flexWrap = 'wrap';
+    content.style.width = '100%';
+
+    // Hide the edit, remove, and drag handle buttons while editing
+    const actionButtons = listItem.querySelectorAll('.edit-btn, .remove-btn, .drag-handle');
+    actionButtons.forEach(btn => btn.style.display = 'none');
+}
+
+function finishEditing(input) {
+    const listItem = input.closest('.list__item');
+    
+    // Check if the input still exists (prevent double-saving)
+    if (!listItem.contains(input)) {
+        return;
+    }
+    
+    const content = listItem.querySelector('.item-content');
+    let text = input.value.trim();
+    
+    if (text === '') {
+        alert('Item cannot be empty. Please enter some text or remove the item.');
+        input.focus();
+        return;
+    }
+
+    // Remove editing class
+    listItem.classList.remove('is-editing');
+
+    if (listItem.closest('#stepList')) {
+        const stepNumber = Array.from(listItem.parentNode.children).indexOf(listItem) + 1;
+        text = `${stepNumber}. ${text}`;
+    }
+    content.textContent = text;
+    updateHiddenInput(listItem.closest('.list').id);
+    if (listItem.closest('#stepList')) {
+        updateStepNumbers();
+    }
+
+    // Restore list item layout
+    listItem.style.display = '';
+    listItem.style.flexWrap = '';
+    content.style.width = '';
+
+    // Show the edit, remove, and drag handle buttons again
+    const actionButtons = listItem.querySelectorAll('.edit-btn, .remove-btn, .drag-handle');
+    actionButtons.forEach(btn => btn.style.display = '');
+}
+
+// Prevent form submission when clicking buttons inside the form
+document.querySelector('form').addEventListener('click', function(e) {
+    if (e.target.tagName === 'BUTTON' && e.target.type !== 'submit') {
+        e.preventDefault();
+    }
+});
+
+    function removeItem(button) {
+        const listItem = button.closest('.list__item');
+        const list = listItem.closest('.list');
+        listItem.remove();
+        updateHiddenInput(list.id);
+        if (list.id === 'stepList') {
+            updateStepNumbers();
         }
+    }
+
+function updateHiddenInput(listId) {
+    const list = document.getElementById(listId);
+    const items = Array.from(list.children).map(item => {
+        const text = item.querySelector('span').textContent;
+        return listId === 'stepList' ? text.replace(/^\d+\.\s*/, '') : text;
+    });
+    const hiddenInput = document.getElementById(listId === 'ingredientList' ? 'ingredientsInput' : 'preparationInput');
+    hiddenInput.value = JSON.stringify(items);
+}
+
+function updateStepNumbers() {
+    const stepList = document.getElementById('stepList');
+    Array.from(stepList.children).forEach((item, index) => {
+        const span = item.querySelector('span');
+        span.textContent = `${index + 1}. ${span.textContent.replace(/^\d+\.\s*/, '')}`;
+    });
+}
+
+// Call setup function when the DOM is fully loaded
+document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
     
-        function removeIngredient(index) {
-            let ingredientArray = ingredients.split('\n');
-            ingredientArray.splice(index, 1);
-            ingredients = ingredientArray.join('\n');
-            updateIngredientList();
-        }
+    // Get the current values from the hidden inputs
+    const ingredients = JSON.parse(document.getElementById('ingredientsInput').value);
+    const preparation = JSON.parse(document.getElementById('preparationInput').value);
     
-        function updateIngredientList() {
-            const list = document.getElementById('ingredientList');
-            list.innerHTML = '';
-            let ingredientArray = ingredients ? ingredients.split('\n') : [];
-            ingredientArray.forEach((ingredient, index) => {
-                const li = document.createElement('li');
-                li.className = 'list-item';
-                li.textContent = ingredient;
-                const removeBtn = document.createElement('button');
-                removeBtn.textContent = 'Remove';
-                removeBtn.className = 'remove-btn';
-                removeBtn.onclick = (e) => {
-                    e.preventDefault();
-                    removeIngredient(index);
-                };
-                li.appendChild(removeBtn);
-                list.appendChild(li);
-            });
-            document.getElementById('ingredientsInput').value = ingredients;
-        }
+    // Set the values back to their original format
+    document.getElementById('ingredientsInput').value = ingredients.join('\n');
+    document.getElementById('preparationInput').value = preparation.join('\n');
     
-        function addStep() {
-            const input = document.getElementById('stepInput');
-    
-            if (input.value.trim() !== '') {
-                steps += (steps ? '\n' : '') + input.value.trim(); // No numbering here
-                updateStepList();
-                input.value = '';
-            }
-        }
-    
-        function removeStep(index) {
-            let stepArray = steps.split('\n');
-            stepArray.splice(index, 1);
-            steps = stepArray.join('\n');
-            updateStepList();
-        }
-    
-        function updateStepList() {
-            const list = document.getElementById('stepList');
-            list.innerHTML = '';
-            let stepArray = steps ? steps.split('\n') : [];
-            stepArray.forEach((step, index) => {
-                const li = document.createElement('li');
-                li.className = 'list-item';
-                li.textContent = step; // Add the numbering only when rendering
-                const removeBtn = document.createElement('button');
-                removeBtn.textContent = 'Remove';
-                removeBtn.className = 'remove-btn';
-                removeBtn.onclick = (e) => {
-                    e.preventDefault();
-                    removeStep(index);
-                };
-                li.appendChild(removeBtn);
-                list.appendChild(li);
-            });
-            document.getElementById('preparationInput').value = steps;
-        }
-    
-        // Initialize lists on page load
-        updateIngredientList();
-        updateStepList();
+    // Submit the form
+    this.submit();
+});
+
+// Call setup function when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', setup);
     </script>
-    
 </body>
 </html>

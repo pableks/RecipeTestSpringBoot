@@ -4,7 +4,7 @@
     <title>My Recipes - Recipe Sharing App</title>
     <link rel="stylesheet" href="/styles.css" />
     <style>
-        .recipe-list {
+         .recipe-list {
             list-style-type: none;
             padding: 0;
         }
@@ -25,6 +25,20 @@
         }
         .recipe-details {
             margin-top: 10px;
+            text-align: left;  /* Add this line */
+        }
+        /* Add these new styles */
+        .recipe-details ul,
+        .recipe-details ol {
+            text-align: left;
+            padding-left: 20px;  /* Add some padding for the list markers */
+        }
+        .recipe-details li {
+            text-align: left;
+        }
+        /* Ensure headers are also left-aligned */
+        .recipe-details h3 {
+            text-align: left;
         }
     </style>
 </head>

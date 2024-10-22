@@ -3,29 +3,156 @@
 <head>
     <title>All Recipes - Recipe Sharing App</title>
     <link rel="stylesheet" href="/styles.css" />
+    <style>
+        .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    color: #2c3e50;
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+    text-align: left; /* Ensure heading is left-aligned */
+}
+
+.recipes-stats {
+    background-color: #f8f9fa;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    color: #666;
+    font-size: 1.1em;
+    text-align: left; /* Left align stats text */
+}
+
+.recipes-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.recipe-card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    justify-content: flex-start; /* Align items to the left */
+    align-items: flex-start; /* Align items to the top */
+}
+
+.recipe-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.recipe-info {
+    flex-grow: 1;
+    text-align: left; /* Ensure text is left-aligned */
+}
+
+.recipe-title {
+    font-size: 1.2em;
+    color: #1877f2;
+    text-decoration: none;
+    font-weight: 600;
+    margin-right: 10px;
+    display: inline-block; /* Help maintain left alignment */
+}
+
+.recipe-meta {
+    color: #666;
+    font-size: 0.9em;
+    margin-top: 5px;
+    text-align: left; /* Ensure meta text is left-aligned */
+}
+
+.empty-state {
+    text-align: left; /* Left align empty state message */
+    padding: 40px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    color: #666;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    justify-content: flex-start; /* Align buttons to the left */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    .recipe-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .recipe-meta {
+        margin-top: 10px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        align-items: flex-start; /* Keep buttons left-aligned on mobile */
+        width: 100%;
+    }
+
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>All Recipes</h1>
-        <div th:if="${recipes == null}">
+        
+        <div th:if="${recipes == null}" class="empty-state">
             <p>Recipes list is null. There might be an error in the controller or service.</p>
         </div>
-        <div th:if="${recipes != null and recipes.empty}">
+        
+        <div th:if="${recipes != null and recipes.empty}" class="empty-state">
             <p>No recipes found. Be the first to add a recipe!</p>
         </div>
+        
         <div th:if="${recipes != null and not recipes.empty}">
-            <p th:text="'Total recipes: ' + ${recipes.size()}"></p>
-            <ul>
-                <li th:each="recipe : ${recipes}">
-                    <a th:href="@{/recipes/{id}(id=${recipe.id})}" th:text="${recipe.name}"></a>
-                    <span th:text="' by ' + ${recipe.createdBy}"></span>
-                    <span th:text="' (Preparation time: ' + ${recipe.preparationTime} + ' minutes)'"></span>
-                    <span th:text="' - Difficulty: ' + ${recipe.difficulty}"></span>
+            <div class="recipes-stats">
+                <p th:text="'Total recipes: ' + ${recipes.size()}"></p>
+            </div>
+            
+            <ul class="recipes-list">
+                <li th:each="recipe : ${recipes}" class="recipe-card">
+                    <div class="recipe-info">
+                        <div>
+                            <a th:href="@{/recipes/{id}(id=${recipe.id})}" 
+                               th:text="${recipe.name}"
+                               class="recipe-title"></a>
+                        </div>
+                        <div class="recipe-meta">
+                            <span class="recipe-author" th:text="'Created by ' + ${recipe.createdBy}"></span>
+                            <span th:text="' • ' + ${recipe.preparationTime} + ' minutes'"></span>
+                            <span th:text="' • ' +${recipe.difficulty}"></span>
+                        </div>
+                    </div>
                 </li>
             </ul>
         </div>
-        <a th:href="@{/recipes/new}">Create New Recipe</a>
-        <a th:href="@{/dashboard}">Back to Dashboard</a>
+        
+        <div class="action-buttons">
+            <a th:href="@{/recipes/new}" class="btn btn-primary">Create New Recipe</a>
+            <a th:href="@{/dashboard}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
     </div>
 </body>
 </html>
