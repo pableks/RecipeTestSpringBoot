@@ -39,6 +39,20 @@
             max-height: fit-content;
         }
 
+        .list__item.is-editing {
+            pointer-events: all !important;
+            cursor: default !important;
+        }
+        
+        .list__item.is-editing .drag-handle {
+            display: none !important;
+        }
+        
+        .edit-input:focus {
+            outline: 2px solid #007bff;
+            border-radius: 4px;
+        }
+
         .list__item {
             width: 100%;
             background: white;
@@ -106,6 +120,19 @@
         .item-content {
             flex-grow: 1;
             padding-right: 44px; /* Width of the drag handle */
+        }
+
+        .edit-input {
+            width: calc(100% - 60px); /* Adjust based on your layout */
+            font-size: 16px;
+            padding: 5px;
+            margin-right: 5px;
+        }
+
+        .save-btn {
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -220,6 +247,12 @@ function parseItems(items) {
 
 function handleDragStart(e) {
     if (e.type === 'mousedown' && e.button !== 0) return; // Only handle left mouse button
+    
+    // Check if any item is currently being edited
+    const editingItem = document.querySelector('.edit-input');
+    if (editingItem) {
+        return; // Prevent drag if an item is being edited
+    }
 
     const target = e.type === 'touchstart' ? document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY) : e.target;
     
@@ -505,8 +538,18 @@ function createListItem(text, isStep, stepNumber) {
 
 function editItem(button) {
     const listItem = button.closest('.list__item');
+    
+    // Check if already editing
+    if (listItem.querySelector('.edit-input')) {
+        return;
+    }
+    
     const content = listItem.querySelector('.item-content');
     const text = content.textContent.replace(/^\d+\.\s*/, '');
+    
+    // Add editing class to the list item
+    listItem.classList.add('is-editing');
+    
     const input = document.createElement('input');
     input.type = 'text';
     input.value = text;
@@ -528,18 +571,39 @@ function editItem(button) {
         }
     };
 
+    // Add blur event to save when clicking outside
+    input.onblur = function(e) {
+        // Small timeout to allow save button click to process
+        setTimeout(() => {
+            if (listItem.contains(document.querySelector('.edit-input'))) {
+                finishEditing(input);
+            }
+        }, 200);
+    };
+
     content.innerHTML = '';
     content.appendChild(input);
     content.appendChild(saveButton);
     input.focus();
 
-    // Hide the edit and remove buttons while editing
-    const actionButtons = listItem.querySelectorAll('.edit-btn, .remove-btn');
+    // Adjust list item layout for editing
+    listItem.style.display = 'flex';
+    listItem.style.flexWrap = 'wrap';
+    content.style.width = '100%';
+
+    // Hide the edit, remove, and drag handle buttons while editing
+    const actionButtons = listItem.querySelectorAll('.edit-btn, .remove-btn, .drag-handle');
     actionButtons.forEach(btn => btn.style.display = 'none');
 }
 
 function finishEditing(input) {
     const listItem = input.closest('.list__item');
+    
+    // Check if the input still exists (prevent double-saving)
+    if (!listItem.contains(input)) {
+        return;
+    }
+    
     const content = listItem.querySelector('.item-content');
     let text = input.value.trim();
     
@@ -548,6 +612,9 @@ function finishEditing(input) {
         input.focus();
         return;
     }
+
+    // Remove editing class
+    listItem.classList.remove('is-editing');
 
     if (listItem.closest('#stepList')) {
         const stepNumber = Array.from(listItem.parentNode.children).indexOf(listItem) + 1;
@@ -559,8 +626,13 @@ function finishEditing(input) {
         updateStepNumbers();
     }
 
-    // Show the edit and remove buttons again
-    const actionButtons = listItem.querySelectorAll('.edit-btn, .remove-btn');
+    // Restore list item layout
+    listItem.style.display = '';
+    listItem.style.flexWrap = '';
+    content.style.width = '';
+
+    // Show the edit, remove, and drag handle buttons again
+    const actionButtons = listItem.querySelectorAll('.edit-btn, .remove-btn, .drag-handle');
     actionButtons.forEach(btn => btn.style.display = '');
 }
 
