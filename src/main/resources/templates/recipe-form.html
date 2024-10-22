@@ -160,6 +160,16 @@
         .btn-primary:hover {
             background-color: #166fe5;
         }
+        .btn-secondary {
+            background-color: #e4e6eb;
+            color: #050505;
+            border: none;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d8dadf;
+        }
+
 
         input[type="text"] {
             width: 100%;
@@ -235,7 +245,7 @@
             <button type="submit"  class="btn btn-primary">Create Recipe</button>
         </form>
         
-        <a th:href="@{/recipes}" class="back-link">Back to Recipes</a>
+        <a th:href="@{/recipes}" class="btn btn-secondary">Back to Recipes</a>
     </div>
 
     <script th:inline="javascript">

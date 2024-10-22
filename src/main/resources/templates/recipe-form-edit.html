@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Recipe</title>
     <style>
-        * {
+ * {
             box-sizing: border-box;
         }
 
@@ -161,6 +161,16 @@
             background-color: #166fe5;
         }
 
+        .btn-secondary {
+            background-color: #e4e6eb;
+            color: #050505;
+            border: none;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d8dadf;
+        }
+
         input[type="text"] {
             width: 100%;
             padding: 0.5rem;
@@ -210,8 +220,10 @@
             
             <div class="form-group">
                 <label>Ingredients:</label>
-                <input type="text" id="ingredientInput" placeholder="Enter an ingredient" onkeypress="handleKeyPress(event, 'ingredient')">
-                <button type="button" onclick="addIngredient()">Add Ingredient</button>
+                <div class="input-group">
+                    <input type="text" id="ingredientInput" placeholder="Enter an ingredient" onkeypress="handleKeyPress(event, 'ingredient')">
+                    <button type="button" class="btn btn-primary" onclick="addIngredient()">Add Ingredient</button>
+                </div>
                 <div class="list-container">
                     <ul id="ingredientList" class="list js-list" data-list-type="ingredient"></ul>
                 </div>
@@ -220,18 +232,20 @@
             
             <div class="form-group">
                 <label>Preparation Steps:</label>
+                <div class="input-group">
                 <input type="text" id="stepInput" placeholder="Enter a preparation step" onkeypress="handleKeyPress(event, 'step')">
-                <button type="button" onclick="addStep()">Add Step</button>
+                <button type="button"  class="btn btn-primary" onclick="addStep()">Add Step</button>
+            </div>
                 <div class="list-container">
                     <ol id="stepList" class="list js-list" data-list-type="step"></ol>
                 </div>
                 <input type="hidden" id="preparationInput" th:field="*{preparation}">
             </div>
             
-            <button type="submit">Edit Recipe</button>
+            <button type="submit" class="btn btn-primary">Edit Recipe</button>
         </form>
         
-        <a th:href="@{/recipes}" class="back-link">Back to Recipes</a>
+        <a th:href="@{/recipes}" class="btn btn-secondary">Back to Recipes</a>
     </div>
 
     <script th:inline="javascript">
