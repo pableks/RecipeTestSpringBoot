@@ -58,10 +58,10 @@
                     <div class="recipe-header">
                         <h2 th:text="${recipe.name}"></h2>
                         <div class="recipe-actions">
-                            <a th:href="@{/recipes/{id}(id=${recipe.id})}" class="btn btn-primary">View</a>
-                            <a th:href="@{/recipes/{id}/edit(id=${recipe.id})}" class="btn btn-secondary">Edit</a>
+                            <a th:href="@{/recipes/{id}(id=${recipe.id})}" class="btn btn-primary">Ver</a>
+                            <a th:href="@{/recipes/{id}/edit(id=${recipe.id})}" class="btn btn-secondary">Editar</a>
                             <form th:action="@{/recipes/{id}/delete(id=${recipe.id})}" method="post" style="display: inline;">
-                                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this recipe?')">Delete</button>
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this recipe?')">Eliminar</button>
                             </form>
                         </div>
                     </div>
@@ -84,7 +84,7 @@
             </ul>
         </div>
         <div class="action-links">
-            <a th:href="@{/recipes/new}" class="btn btn-primary">Crear Nueva Receta/a>
+            <a th:href="@{/recipes/new}" class="btn btn-primary">Crear Nueva Receta</a>
             <a th:href="@{/dashboard}" class="btn btn-secondary">Regresa al Dashboard</a>
         </div>
     </div>
