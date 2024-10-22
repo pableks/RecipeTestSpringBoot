@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>My Recipes - Recipe Sharing App</title>
+    <title>Mis Recetas - TastyLab Red Social de Recetas!</title>
     <link rel="stylesheet" href="/styles.css" />
     <style>
          .recipe-list {
@@ -44,12 +44,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>My Recipes</h1>
+        <h1>Mis Recetas</h1>
         <div th:if="${recipes == null}">
-            <p>An error occurred while loading your recipes.</p>
+            <p>Se produjo un error al cargar tus recetas.</p>
         </div>
         <div th:if="${recipes != null and recipes.empty}">
-            <p>You haven't created any recipes yet. Start cooking!</p>
+            <p>Aún no has creado ninguna receta. ¡Empieza a cocinar!</p>
         </div>
         <div th:if="${recipes != null and not recipes.empty}">
             <p th:text="'Total recipes: ' + ${recipes.size()}"></p>
@@ -67,14 +67,14 @@
                     </div>
                     <div class="recipe-details">
                         <p>
-                            <span th:text="'Preparation time: ' + ${recipe.preparationTime} + ' minutes'"></span> |
-                            <span th:text="'Difficulty: ' + ${recipe.difficulty}"></span>
+                            <span th:text="'Tiempo de preparación: ' + ${recipe.preparationTime} + ' minutes'"></span> |
+                            <span th:text="'Dificultad: ' + ${recipe.difficulty}"></span>
                         </p>
-                        <h3>Ingredients:</h3>
+                        <h3>Ingredientes:</h3>
                         <ul>
                             <li th:each="ingredient : ${recipe.ingredientList}" th:text="${ingredient}"></li>
                         </ul>
-                        <h3>Preparation Steps:</h3>
+                        <h3>Preparación:</h3>
                         <ol>
                             <li th:each="step : ${recipe.preparationSteps}" th:text="${step}"></li>
                         </ol>
@@ -84,8 +84,8 @@
             </ul>
         </div>
         <div class="action-links">
-            <a th:href="@{/recipes/new}" class="btn btn-primary">Create New Recipe</a>
-            <a th:href="@{/dashboard}" class="btn btn-secondary">Back to Dashboard</a>
+            <a th:href="@{/recipes/new}" class="btn btn-primary">Crear Nueva Receta/a>
+            <a th:href="@{/dashboard}" class="btn btn-secondary">Regresa al Dashboard</a>
         </div>
     </div>
 </body>

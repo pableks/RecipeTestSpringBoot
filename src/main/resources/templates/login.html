@@ -1,43 +1,43 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Login - Recipe Sharing App</title>
+    <title>Login - TastyLab Red Social de Recetas!</title>
     <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
     <div class="container">
-        <h1>Please Log In</h1>
+        <h1>Ingresa a tu cuenta</h1>
         
         <div th:if="${param.error}" class="alert alert-error">
-            Invalid username and password.
+            Nombre de usuario y contraseña no válidos.
         </div>
         
         <div th:if="${param.logout}" class="alert alert-success">
-            You have been logged out.
+            Tu sesión ha sido cerrada
         </div>
         
         <form th:action="@{/login}" method="post">
             <div class="form-group">
-                <label for="username">Username:</label>
+                <label for="username">Nombre de usuario:</label>
                 <input type="text" id="username" name="username" required autofocus />
             </div>
             
             <div class="form-group">
-                <label for="password">Password:</label>
+                <label for="password">Contraseña:</label>
                 <input type="password" id="password" name="password" required />
             </div>
             
             <div class="form-group">
-                <button type="submit" class="btn btn-primary">Log in</button>
+                <button type="submit" class="btn btn-primary">Ingresar</button>
             </div>
         </form>
         
         <div class="register-link">
-            Don't have an account? <a th:href="@{/users/register}">Register here</a>
+            ¿No tienes una cuenta? <a th:href="@{/users/register}">Registrate Aquí</a>
         </div>
         
         <div class="back-link">
-            <a th:href="@{/}">Back to Home</a>
+            <a th:href="@{/}">Regresa al Home</a>
         </div>
     </div>
 </body>

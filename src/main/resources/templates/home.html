@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Home - Recipe Sharing App</title>
+    <title>Home - TastyLab Red Social de Recetas!</title>
     <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
@@ -13,13 +13,13 @@
             <p>Seguridad implementada con Spring Security</p>
             <div class="nav-links">
                 <a th:href="@{/dashboard}">Dashboard</a>
-                <a th:href="@{/users/profile}">My Profile</a>
+                <a th:href="@{/users/profile}">Mi Perfil</a>
                 <a th:href="@{/logout}">Logout</a>
             </div>
         </div>
         
         <div sec:authorize="!isAuthenticated()">
-            <p>Please log in to access all features.</p>
+            <p>Inicie sesión para acceder a todas las funcionalidades.</p>
             <div class="nav-links">
                 <a th:href="@{/login}" class="btn btn-primary">Login</a>
                 <a th:href="@{/users/register}" class="btn btn-secondary">Register</a>

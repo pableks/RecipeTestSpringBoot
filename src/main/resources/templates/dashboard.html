@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Dashboard - Recipe Sharing App</title>
+    <title>Dashboard - TastyLab Red Social de Recetas!</title>
     <link rel="stylesheet" href="/styles.css" />
     <style>
         .container {
@@ -138,26 +138,26 @@
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to Your Dashboard</h1>
+        <h1>Bienvenido a tu Dashboard</h1>
         
         <div sec:authorize="isAuthenticated()">
-            <h2 th:text="'Hello, ' + ${username} + '!'"></h2>
-            <p>Here's your personal dashboard for the Recipe Sharing App.</p>
+            <h2 th:text="'Hola de nuevo, ' + ${username} + '!'"></h2>
+            <p>Aquí está tu Dashboard personal</p>
             
             <div class="user-info">
-                <h3>Your Information:</h3>
-                <p th:text="'Username: ' + ${username}"></p>
+                <h3>Tu Información:</h3>
+                <p th:text="'Nombre de Usuario: ' + ${username}"></p>
                 <p th:text="'Email: ' + ${userEmail}"></p>
-                <p th:text="'Role: ' + ${userRole}"></p>
+                <p th:text="'Rol: ' + ${userRole}"></p>
             </div>
             
             <div class="dashboard-links">
-                <h3>Quick Links:</h3>
+                <h3>Links Rápidos</h3>
                 <ul>
-                    <li><a th:href="@{/recipes}">View All Recipes</a></li>
-                    <li><a th:href="@{/recipes/my-recipes}">My Recipes</a></li>
-                    <li><a th:href="@{/recipes/new}">Create New Recipe</a></li>
-                    <li><a th:href="@{/users/profile}">Edit Profile</a></li>
+                    <li><a th:href="@{/recipes}">Ver todas las recetas</a></li>
+                    <li><a th:href="@{/recipes/my-recipes}">Mis Recetas</a></li>
+                    <li><a th:href="@{/recipes/new}">Crear Nueva Receta</a></li>
+                    <li><a th:href="@{/users/profile}">Editar Perfil</a></li>
                 </ul>
             </div>
         </div>

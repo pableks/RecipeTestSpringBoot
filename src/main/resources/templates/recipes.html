@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>All Recipes - Recipe Sharing App</title>
+    <title>Todas las Recetas - TastyLab Red Social de Recetas!</title>
     <link rel="stylesheet" href="/styles.css" />
     <style>
         .container {
@@ -116,19 +116,19 @@ h1 {
 </head>
 <body>
     <div class="container">
-        <h1>All Recipes</h1>
+        <h1>Todas las Recetas</h1>
         
         <div th:if="${recipes == null}" class="empty-state">
-            <p>Recipes list is null. There might be an error in the controller or service.</p>
+            <p>La lista de recetas es nula. Puede haber un error en el controlador o en el servicio.</p>
         </div>
         
         <div th:if="${recipes != null and recipes.empty}" class="empty-state">
-            <p>No recipes found. Be the first to add a recipe!</p>
+            <p>No se encontraron recetas. ¡Sé el primero en agregar una receta!</p>
         </div>
         
         <div th:if="${recipes != null and not recipes.empty}">
             <div class="recipes-stats">
-                <p th:text="'Total recipes: ' + ${recipes.size()}"></p>
+                <p th:text="'Total de recetas: ' + ${recipes.size()}"></p>
             </div>
             
             <ul class="recipes-list">
@@ -140,7 +140,7 @@ h1 {
                                class="recipe-title"></a>
                         </div>
                         <div class="recipe-meta">
-                            <span class="recipe-author" th:text="'Created by ' + ${recipe.createdBy}"></span>
+                            <span class="recipe-author" th:text="'Creada por ' + ${recipe.createdBy}"></span>
                             <span th:text="' • ' + ${recipe.preparationTime} + ' minutes'"></span>
                             <span th:text="' • ' +${recipe.difficulty}"></span>
                         </div>
@@ -150,8 +150,8 @@ h1 {
         </div>
         
         <div class="action-buttons">
-            <a th:href="@{/recipes/new}" class="btn btn-primary">Create New Recipe</a>
-            <a th:href="@{/dashboard}" class="btn btn-secondary">Back to Dashboard</a>
+            <a th:href="@{/recipes/new}" class="btn btn-primary">Crear Nueva Receta</a>
+            <a th:href="@{/dashboard}" class="btn btn-secondary">Regresa al Dashboard</a>
         </div>
     </div>
 </body>

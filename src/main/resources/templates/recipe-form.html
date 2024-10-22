@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Recipe</title>
+    <title>Crear Nueva Receta</title>
     <style>
         * {
             box-sizing: border-box;
@@ -196,33 +196,33 @@
 </head>
 <body>
     <div class="container">
-        <h1>Create New Recipe</h1>
+        <h1>Crear Nueva Receta</h1>
         
         <form th:action="@{/recipes}" method="post" th:object="${recipe}">
             <div class="form-group">
-                <label for="name">Recipe Name:</label>
+                <label for="name">Nombre de la Receta:</label>
                 <input type="text" id="name" th:field="*{name}" required />
             </div>
             
             <div class="form-group">
-                <label for="preparationTime">Preparation Time (minutes):</label>
+                <label for="preparationTime">Tiempo de preparación (Minutos):</label>
                 <input type="number" id="preparationTime" th:field="*{preparationTime}" required />
             </div>
             
             <div class="form-group">
-                <label for="difficulty">Difficulty:</label>
+                <label for="difficulty">Dificultad:</label>
                 <select id="difficulty" th:field="*{difficulty}">
-                    <option value="Easy">Easy</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Hard">Hard</option>
+                    <option value="Facil">Fácil</option>
+                    <option value="Mediana">Mediana</option>
+                    <option value="Dificil">Difícil</option>
                 </select>
             </div>
             
             <div class="form-group">
-                <label>Ingredients:</label>
+                <label>Ingredientes:</label>
                 <div class="input-group">
                     <input type="text" id="ingredientInput" placeholder="Enter an ingredient" onkeypress="handleKeyPress(event, 'ingredient')">
-                    <button type="button" class="btn btn-primary" onclick="addIngredient()">Add Ingredient</button>
+                    <button type="button" class="btn btn-primary" onclick="addIngredient()">Añadir Ingrediente</button>
                 </div>
                 <div class="list-container">
                     <ul id="ingredientList" class="list js-list" data-list-type="ingredient"></ul>
@@ -231,10 +231,10 @@
             </div>
             
             <div class="form-group">
-                <label>Preparation Steps:</label>
+                <label>Preparación:</label>
                 <div class="input-group">
                 <input type="text" id="stepInput" placeholder="Enter a preparation step" onkeypress="handleKeyPress(event, 'step')">
-                <button type="button"  class="btn btn-primary" onclick="addStep()">Add Step</button>
+                <button type="button"  class="btn btn-primary" onclick="addStep()">Añadir Paso</button>
             </div>
                 <div class="list-container">
                     <ol id="stepList" class="list js-list" data-list-type="step"></ol>
@@ -242,10 +242,10 @@
                 <input type="hidden" id="preparationInput" th:field="*{preparation}">
             </div>
             
-            <button type="submit"  class="btn btn-primary">Create Recipe</button>
+            <button type="submit"  class="btn btn-primary">Crear Receta</button>
         </form>
         
-        <a th:href="@{/recipes}" class="btn btn-secondary">Back to Recipes</a>
+        <a th:href="@{/recipes}" class="btn btn-secondary">Regresa a las Recetas</a>
     </div>
 
     <script th:inline="javascript">
